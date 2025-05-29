@@ -37,7 +37,6 @@ public class Figure : MonoBehaviour
 
     private void OnMouseDown()
     {
-
         OnClick?.Invoke(this);
     }
 

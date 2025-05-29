@@ -41,7 +41,7 @@ public class GamesEndPanel : MonoBehaviour
     /// </summary>
     public void Restart()
     {
-        SceneLoader.LoadScene(SceneManager.loadedSceneCount);
+        SceneLoader.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }
