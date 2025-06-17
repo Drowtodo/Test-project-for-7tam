@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 
 /// <summary>
@@ -13,6 +15,11 @@ public class Figure : MonoBehaviour
     private SpriteRenderer BackgroundSpriteRenderer;
 
     private SpriteRenderer FormSprite;
+
+    [SerializeField]
+    private AudioSource CollisionSound;
+
+    private bool _onClickEnabled = true;
 
     /// <summary>
     /// Событие вызываемое по нажатию на фигурку
@@ -37,14 +44,33 @@ public class Figure : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if(UIChecker.IsPointerOverUI(Pointer.current.position.ReadValue()))
+        {
+            return;
+        }
+        
+        if(!_onClickEnabled)
+        {
+            return;
+        }
+
         OnClick?.Invoke(this);
     }
+
+    
 
     private void OnDestroy()
     {
         OnClick.RemoveAllListeners();
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.relativeVelocity.sqrMagnitude >= 3f)
+        {
+            CollisionSound.Play();
+        }
+    }
 
     //Перегрузка операторов == и != для удобства
     public static bool operator ==(Figure a, Figure b)
@@ -77,4 +103,8 @@ public class Figure : MonoBehaviour
         return (BackgroundSpriteRenderer, AnimalSpriteRenderer.sprite);
     }
 
+    public void SetOnClickEnabled(bool state)
+    {
+        _onClickEnabled = state;
+    }
 }

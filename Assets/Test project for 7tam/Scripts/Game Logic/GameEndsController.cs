@@ -35,6 +35,8 @@ public class GameEndsController : MonoBehaviour
             }
             
         }
+        Debug.Log($"rfc = {FigureGenerator.RestFiguresCount}\n" +
+            $"fc = {figuresBar.FiguresCount}");
     }
 
     private void Win()

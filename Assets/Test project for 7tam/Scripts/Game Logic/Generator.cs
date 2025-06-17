@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using Random = UnityEngine.Random;
 
 /// <summary>
 /// Класс отвечающий за генерацию фигурок и их обновление
@@ -14,6 +16,11 @@ public class Generator : MonoBehaviour
     /// </summary>
     [SerializeField]
     private List<Color> ColorVariants;
+
+    /// <summary>
+    /// Словарь для добавления способоснтей фигуркам
+    /// </summary>
+    private Dictionary<Color, Type> _figuresAbilitys =new(); 
 
     /// <summary>
     /// Возможные формы для фигурок
@@ -57,9 +64,24 @@ public class Generator : MonoBehaviour
     /// </summary>
     public UnityEvent OnGeneratingEnds;
 
-    public int RestFiguresCount { get { return transform.childCount; } }
+    public int RestFiguresCount { get 
+        {
+            int i = 0;
+            for (int j = transform.childCount - 1; j >= 0; j--)
+            {
+                if(transform.GetChild(j).gameObject.activeInHierarchy)
+                {
+                    i++;
+                }
+            }
+            return i;
+        } }
+
+
     private void Start()
     {
+        _figuresAbilitys.Add(Color.red, typeof(Explosion));
+        _figuresAbilitys.Add(Color.blue, typeof(Frozen));
 
         List<FigureSample> FigureSampleList = new();
         for (int i = 0; i < MaxTripleVariants; i++)
@@ -90,6 +112,9 @@ public class Generator : MonoBehaviour
                 form.gameObject.SetActive(true);
                 form.Init(FigureSampleList[i].BackgroundColor, FigureSampleList[i].AnimalSprite);
                 form.OnClick.AddListener(OnFigureClickWrapper);
+
+                AddAbility(form.gameObject, FigureSampleList[i].BackgroundColor);
+
                 FigureSampleList[i].RestCount--;
                 if (FigureSampleList[i].RestCount == 0)
                 {
@@ -99,6 +124,20 @@ public class Generator : MonoBehaviour
             yield return waiter;
         }
         OnGeneratingEnds?.Invoke();
+    }
+
+
+    /// <summary>
+    /// Метод для добавления спосбностей фигуркам
+    /// </summary>
+    /// <param name="figure"></param>
+    /// <param name="checkColor"></param>
+    private void AddAbility(GameObject figure, Color checkColor)
+    {
+        if(_figuresAbilitys.ContainsKey(checkColor))
+        {
+            figure.AddComponent(_figuresAbilitys[checkColor]);
+        }
     }
 
     /// <summary>
@@ -140,7 +179,11 @@ public class Generator : MonoBehaviour
 
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            Destroy(transform.GetChild(i).gameObject);
+            var go = transform.GetChild(i).gameObject;
+            if(go.activeInHierarchy)
+            {
+                Destroy(go);
+            }
         }
 
         List<FigureSample> list = new();
@@ -153,7 +196,14 @@ public class Generator : MonoBehaviour
             int restCount = count - i;
             if (currentSampleCount > restCount)
             {
-                currentSampleCount = restCount;
+                if (restCount % 3 != 0)
+                {
+                    currentSampleCount = restCount - restCount % 3 + 3;
+                }
+                else
+                {
+                    currentSampleCount = restCount;
+                }
             }
             list.Add(new FigureSample(FormVariants[Random.Range(0, FormVariants.Count)],
                 ColorVariants[Random.Range(0, ColorVariants.Count)],
@@ -165,7 +215,7 @@ public class Generator : MonoBehaviour
     }
 
     /// <summary>
-    /// Метода для генерации листа шаблонов фигурок на основе фигурок из экшен-бара
+    /// Метод для генерации листа шаблонов фигурок на основе фигурок из экшен-бара
     /// </summary>
     /// <returns></returns>
     private List<FigureSample> GetUniqueFigureSample()

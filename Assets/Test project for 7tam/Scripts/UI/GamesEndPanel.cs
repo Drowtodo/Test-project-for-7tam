@@ -13,15 +13,20 @@ public class GamesEndPanel : MonoBehaviour
     [SerializeField]
     private SceneLoader SceneLoader;
 
-    
+    [SerializeField]
+    private AudioSource LoseSound;
+    [SerializeField]
+    private AudioSource WinSound;
     public void OnWin()
     {
         Activate("Победа!", Color.green);
+        WinSound.Play();
     }
 
     public void OnLose()
     {
         Activate("Поражение...", Color.red);
+        LoseSound.Play();
     }
 
     /// <summary>

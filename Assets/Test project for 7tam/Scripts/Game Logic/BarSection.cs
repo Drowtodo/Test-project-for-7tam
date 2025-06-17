@@ -17,7 +17,6 @@ public class BarSection : MonoBehaviour
     public void Set(Figure figure, GameObject FigureUIPrefab)
     {
         Figure = figure;
-        figure.transform.SetParent(transform);
         figure.gameObject.SetActive(false);
         figureUI = Instantiate(FigureUIPrefab, transform).GetComponent<FigureUI>();
         figureUI.Init(figure);
@@ -39,9 +38,12 @@ public class BarSection : MonoBehaviour
     /// </summary>
     public void Remove()
     {
-        Destroy(Figure.gameObject);
-        Destroy(figureUI.gameObject);
-        _isFree = true;
+        if(!_isFree)
+        {
+            Destroy(Figure.gameObject);
+            Destroy(figureUI.gameObject);
+            _isFree = true;
+        }
     }
 
     

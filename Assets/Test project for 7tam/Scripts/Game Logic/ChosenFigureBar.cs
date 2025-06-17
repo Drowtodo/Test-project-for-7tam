@@ -10,6 +10,9 @@ public class ChosenFigureBar : MonoBehaviour
 {
     private List<BarSection> SectionsList;
 
+    [SerializeField]
+    private AudioSource FigureRemoveSound;
+
     /// <summary>
     /// Префаб фигурки в качестве эллемента UI
     /// </summary>
@@ -74,6 +77,11 @@ public class ChosenFigureBar : MonoBehaviour
                 SectionsList[temp[i]].Remove();
             }
             FiguresCount -= 2;
+            FigureRemoveSound.Play();
+            if(figure.TryGetComponent(out FigureAbility ability))
+            {
+                ability.Use(gameObject);
+            }
         }
         else
         {
@@ -91,5 +99,11 @@ public class ChosenFigureBar : MonoBehaviour
     public List<Figure> GetFigures()
     {
         return SectionsList.Where(x => !x.IsFree()).Select(x => x.Figure).ToList();
+    }
+
+    public void Clear()
+    {
+        SectionsList.ForEach((x) => x.Remove());
+        FiguresCount = 0;
     }
 }
